@@ -32,6 +32,7 @@ Import('*')
 
 SimObject('ReplacementPolicies.py')
 
+Source('arc_rp.cc')
 Source('bip_rp.cc')
 Source('brrip_rp.cc')
 Source('fifo_rp.cc')

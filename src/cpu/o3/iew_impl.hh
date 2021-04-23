@@ -299,6 +299,18 @@ DefaultIEW<Impl>::regStats()
         .desc("insts written-back per cycle")
         .flags(total);
     wbRate = writebackCount / cpu->numCycles;
+
+    iewBranchPercentage
+        .name(name() + ".branch_percentage")
+        .desc("Percentage of branches executed");
+
+    iewBranchPercentage = (sum(iewExecutedBranches) / iewExecutedInsts) * 100;
+
+    iewBranchMispredictRate
+        .name(name() + ".branch_mispredict_rate")
+        .desc("Percentage of branch mispredicts");
+
+    iewBranchMispredictRate = (branchMispredicts / sum(iewExecutedBranches)) * 100;
 }
 
 template<class Impl>

@@ -134,6 +134,7 @@ if args:
 
 multiprocesses = []
 numThreads = 1
+incram = 0 #Tosi's changes for ECE 462/562 from here...
 
 if options.bench:
     apps = options.bench.split("-")
@@ -142,22 +143,41 @@ if options.bench:
         sys.exit(1)
 
     for app in apps:
-        try:
-            if buildEnv['TARGET_ISA'] == 'alpha':
-                exec("workload = %s('alpha', 'tru64', '%s')" % (
-                        app, options.spec_input))
-            elif buildEnv['TARGET_ISA'] == 'arm':
-                exec("workload = %s('arm_%s', 'linux', '%s')" % (
-                        app, options.arm_iset, options.spec_input))
-            else:
+        process = Process(pid = 100 + incram)
+        bin_dir = '/home/comparch/benchmarks/'
+
+        if app == 'mcf':
+                process.executable = bin_dir+'spec2006/mcf/mcf_base.armv71'
+                data = bin_dir+'spec2006/mcf/test/input/inp.in'
+                output = bin_dir+'spec2006/mcf/inp.out'
+                process.cmd = [process.executable] + [data] + ['>'] + [output]
+        elif app == 'bzip2':
+                process.executable = bin_dir+'spec2006/bzip2/bzip2_base.arm71'
+                data = bin_dir+'spec2006/bzip2/test/input/chicken.jpg'
+                output = bin_dir+'spec2006/bzip2/input.program.out'
+                process.cmd = [process.executable] + [data] + ['30'] + ['>'] +  [output] + ['2>'] + [bin_dir+'spec2006/bzip2/chicken.err']
+        elif app == 'libquantum':
+                process.executable = bin_dir+'spec2006/libquantum/libquantum_base.armv71'
+                process.cmd = [process.executable] + ['1397 8']
+                process.output = bin_dir+'spec2006/libquantum/libquantum_ref.out'
+        elif app == 'a2time01':
+                process.executable = bin_dir+'embedded/A2TIME01'
+                process.cmd = [process.executable] + ['-autogo']
+                process.output = bin_dir+'embedded/output/a2time01.out'
+        elif app == 'cacheb01':
+                process.executable = bin_dir+'embedded/CACHEB01'
+                process.cmd = [process.executable] + ['-autogo']
+                process.output = bin_dir+'embedded/output/cacheb01.out'
+        elif app == 'bitmnp01':
+                process.executable = bin_dir+'embedded/BITMNP01'
+                process.cmd = [process.executable] + ['-autogo']
+                process.output = bin_dir+'embedded/output/bitmnp01.out'
+
+        else: #Tosi's changes for ECE 462/562 end here...
                 exec("workload = %s(buildEnv['TARGET_ISA', 'linux', '%s')" % (
                         app, options.spec_input))
-            multiprocesses.append(workload.makeProcess())
-        except:
-            print("Unable to find workload for %s: %s" %
-                  (buildEnv['TARGET_ISA'], app),
-                  file=sys.stderr)
-            sys.exit(1)
+        multiprocesses.append(process)
+
 elif options.cmd:
     multiprocesses, numThreads = get_processes(options)
 else:
@@ -280,3 +300,4 @@ else:
 
 root = Root(full_system = False, system = system)
 Simulation.run(options, root, system, FutureClass)
+

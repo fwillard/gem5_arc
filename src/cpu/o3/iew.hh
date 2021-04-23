@@ -482,6 +482,9 @@ class DefaultIEW
     Stats::Formula wbRate;
     /** Average number of woken instructions per writeback. */
     Stats::Formula wbFanout;
+
+    Stats::Formula iewBranchPercentage;
+    Stats::Formula iewBranchMispredictRate;
 };
 
 #endif // __CPU_O3_IEW_HH__

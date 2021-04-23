@@ -36,7 +36,7 @@
 #include "params/ARCRP.hh"
 
 ARCRP::ARCRP(const Params *p)
-    : BaseReplacementPolicy(p)
+	: BaseReplacementPolicy(p)
 {
 }
 
@@ -44,54 +44,68 @@ void
 ARCRP::invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
 const
 {
-    // Reset insertion tick
-    std::static_pointer_cast<ARCReplData>(
-        replacement_data)->tickInserted = Tick(0);
+	// Reset last touch timestamp
+	std::static_pointer_cast<ARCReplData>(
+		replacement_data)->lastTouchTick = Tick(0);
+
+	// Reset reference count
+	std::static_pointer_cast<ARCReplData>(replacement_data)->refCount = 0;
 }
 
 void
 ARCRP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
 {
-    // A touch does not modify the insertion tick
+	// Update last touch timestamp
+	std::static_pointer_cast<ARCReplData>(
+		replacement_data)->lastTouchTick = curTick();
+
+	// Update reference count
+	std::static_pointer_cast<ARCReplData>(replacement_data)->refCount++;
 }
 
 void
 ARCRP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
 {
-    // Set insertion tick
-    std::static_pointer_cast<ARCReplData>(
-        replacement_data)->tickInserted = curTick();
+	// Set last touch timestamp
+	std::static_pointer_cast<ARCReplData>(
+		replacement_data)->lastTouchTick = curTick();
+
+	// Reset reference count
+	std::static_pointer_cast<ARCReplData>(replacement_data)->refCount = 1;
 }
 
 ReplaceableEntry*
 ARCRP::getVictim(const ReplacementCandidates& candidates) const
 {
-    // There must be at least one replacement candidate
-    assert(candidates.size() > 0);
+	// There must be at least one replacement candidate
+	assert(candidates.size() > 0);
 
-    // Visit all candidates to find victim
-    ReplaceableEntry* victim = candidates[0];
-    for (const auto& candidate : candidates) {
-        // Update victim entry if necessary
-        if (std::static_pointer_cast<ARCReplData>(
-                    candidate->replacementData)->tickInserted <
-                std::static_pointer_cast<ARCReplData>(
-                    victim->replacementData)->tickInserted) {
-            victim = candidate;
-        }
-    }
+	// Visit all candidates to find victim
+	ReplaceableEntry* victim = candidates[0];
+	for (const auto& candidate : candidates) {
+		// Update victim entry if necessary
 
-    return victim;
+		/* FIFO algorithm currently, this is where ARC needs to be implemented
+		if (std::static_pointer_cast<ARCReplData>(
+					candidate->replacementData)->tickInserted <
+				std::static_pointer_cast<ARCReplData>(
+					victim->replacementData)->tickInserted) {
+			victim = candidate;
+		}
+		*/
+	}
+
+	return victim;
 }
 
 std::shared_ptr<ReplacementData>
 ARCRP::instantiateEntry()
 {
-    return std::shared_ptr<ReplacementData>(new ARCReplData());
+	return std::shared_ptr<ReplacementData>(new ARCReplData());
 }
 
 ARCRP*
 ARCRPParams::create()
 {
-    return new ARCRP(this);
+	return new ARCRP(this);
 }

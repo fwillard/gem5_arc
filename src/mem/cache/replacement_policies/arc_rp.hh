@@ -28,12 +28,12 @@
  * Authors: Daniel Carvalho
  */
 
-/**
- * @file
- * Declaration of a First In First Out replacement policy.
- * The victim is chosen using the timestamp. The oldest entry is always chosen
- * to be evicted, regardless of the amount of times it has been touched.
- */
+ /**
+  * @file
+  * Declaration of a First In First Out replacement policy.
+  * The victim is chosen using the timestamp. The oldest entry is always chosen
+  * to be evicted, regardless of the amount of times it has been touched.
+  */
 
 #ifndef __MEM_CACHE_REPLACEMENT_POLICIES_ARC_RP_HH__
 #define __MEM_CACHE_REPLACEMENT_POLICIES_ARC_RP_HH__
@@ -45,75 +45,78 @@ struct ARCRPParams;
 
 class ARCRP : public BaseReplacementPolicy
 {
-  protected:
-    /** ARC-specific implementation of replacement data. */
-    struct ARCReplData : ReplacementData
-    {
-        /** Tick on which the entry was inserted. */
-        Tick tickInserted;
+protected:
+	/** ARC-specific implementation of replacement data. */
+	struct ARCReplData : ReplacementData
+	{
+		/** Tick on which the entry was last touched. */
+		Tick lastTouchTick;
 
-        /**
-         * Default constructor. Invalidate data.
-         */
-        ARCReplData() : tickInserted(0) {}
-    };
+		/** Number of references to this entry since it was reset. */
+		unsigned refCount;
 
-  public:
-    /** Convenience typedef. */
-    typedef ARCRPParams Params;
+		/**
+		 * Default constructor. Invalidate data.
+		 */
+		ARCReplData() : lastTouchTick(0), refCount(0) {}
+	};
 
-    /**
-     * Construct and initiliaze this replacement policy.
-     */
-    ARCRP(const Params *p);
+public:
+	/** Convenience typedef. */
+	typedef ARCRPParams Params;
 
-    /**
-     * Destructor.
-     */
-    ~ARCRP() {}
+	/**
+	 * Construct and initiliaze this replacement policy.
+	 */
+	ARCRP(const Params *p);
 
-    /**
-     * Invalidate replacement data to set it as the next probable victim.
-     * Reset insertion tick to 0.
-     *
-     * @param replacement_data Replacement data to be invalidated.
-     */
-    void invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
-                                                              const override;
+	/**
+	 * Destructor.
+	 */
+	~ARCRP() {}
 
-    /**
-     * Touch an entry to update its replacement data.
-     * Does not modify the replacement data.
-     *
-     * @param replacement_data Replacement data to be touched.
-     */
-    void touch(const std::shared_ptr<ReplacementData>& replacement_data) const
-                                                                     override;
+	/**
+	 * Invalidate replacement data to set it as the next probable victim.
+	 * Reset insertion tick to 0.
+	 *
+	 * @param replacement_data Replacement data to be invalidated.
+	 */
+	void invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
+		const override;
 
-    /**
-     * Reset replacement data. Used when an entry is inserted.
-     * Sets its insertion tick.
-     *
-     * @param replacement_data Replacement data to be reset.
-     */
-    void reset(const std::shared_ptr<ReplacementData>& replacement_data) const
-                                                                     override;
+	/**
+	 * Touch an entry to update its replacement data.
+	 * Does not modify the replacement data.
+	 *
+	 * @param replacement_data Replacement data to be touched.
+	 */
+	void touch(const std::shared_ptr<ReplacementData>& replacement_data) const
+		override;
 
-    /**
-     * Find replacement victim using insertion timestamps.
-     *
-     * @param cands Replacement candidates, selected by indexing policy.
-     * @return Replacement entry to be replaced.
-     */
-    ReplaceableEntry* getVictim(const ReplacementCandidates& candidates) const
-                                                                     override;
+	/**
+	 * Reset replacement data. Used when an entry is inserted.
+	 * Sets its insertion tick.
+	 *
+	 * @param replacement_data Replacement data to be reset.
+	 */
+	void reset(const std::shared_ptr<ReplacementData>& replacement_data) const
+		override;
 
-    /**
-     * Instantiate a replacement data entry.
-     *
-     * @return A shared pointer to the new replacement data.
-     */
-    std::shared_ptr<ReplacementData> instantiateEntry() override;
+	/**
+	 * Find replacement victim using insertion timestamps.
+	 *
+	 * @param cands Replacement candidates, selected by indexing policy.
+	 * @return Replacement entry to be replaced.
+	 */
+	ReplaceableEntry* getVictim(const ReplacementCandidates& candidates) const
+		override;
+
+	/**
+	 * Instantiate a replacement data entry.
+	 *
+	 * @return A shared pointer to the new replacement data.
+	 */
+	std::shared_ptr<ReplacementData> instantiateEntry() override;
 };
 
 #endif // __MEM_CACHE_REPLACEMENT_POLICIES_ARC_RP_HH__

@@ -82,19 +82,18 @@ ARCRP::getVictim(const ReplacementCandidates& candidates) const
 
 	// Visit all candidates to find victim
 	ReplaceableEntry* victim = candidates[0];
+
+	/* FIFO algorithm currently, this is where ARC needs to be implemented
 	for (const auto& candidate : candidates) {
 		// Update victim entry if necessary
-
-		/* FIFO algorithm currently, this is where ARC needs to be implemented
 		if (std::static_pointer_cast<ARCReplData>(
 					candidate->replacementData)->tickInserted <
 				std::static_pointer_cast<ARCReplData>(
 					victim->replacementData)->tickInserted) {
 			victim = candidate;
 		}
-		*/
 	}
-
+	*/
 	return victim;
 }
 

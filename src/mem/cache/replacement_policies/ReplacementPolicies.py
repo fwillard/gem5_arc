@@ -39,6 +39,9 @@ class ARCRP(BaseReplacementPolicy):
     type = 'ARCRP'
     cxx_class = 'ARCRP'
     cxx_header = "mem/cache/replacement_policies/arc_rp.hh"
+    size = Param.MemorySize('32kB', "Size of cache")
+    assoc = Param.Int(4, "Cache associativity")
+    line_size = Param.Int(64, "Cache line size")
 
 class FIFORP(BaseReplacementPolicy):
     type = 'FIFORP'

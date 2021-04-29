@@ -36,8 +36,20 @@
 #include "params/ARCRP.hh"
 
 ARCRP::ARCRP(const Params *p)
-	: BaseReplacementPolicy(p)
+        : BaseReplacementPolicy(p),
+        size(p->size),
+        line_size(p->line_size),
+        assoc(p->assoc)
 {
+        std::cout << "Cache size from ARCRP: " << size << std::endl;
+        std::cout << "Cache line size from ARCRP: " << line_size << std::endl;
+        std::cout << "Cache assoc from ARCRP: " << assoc << std::endl;
+
+        num_blocks = size / line_size;
+        std::cout << "Num blocks from ARCRP: " << num_blocks << std::endl;
+
+        T1_size = num_blocks / 2;
+        T2_size = num_blocks / 2;
 }
 
 void
@@ -65,13 +77,9 @@ ARCRP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
 
 void
 ARCRP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
-{
-	// Set last touch timestamp
-	std::static_pointer_cast<ARCReplData>(
-		replacement_data)->lastTouchTick = curTick();
+{	//new entry into cache
+        //add to t1
 
-	// Reset reference count
-	std::static_pointer_cast<ARCReplData>(replacement_data)->refCount = 1;
 }
 
 ReplaceableEntry*

@@ -38,6 +38,8 @@
 #ifndef __MEM_CACHE_REPLACEMENT_POLICIES_ARC_RP_HH__
 #define __MEM_CACHE_REPLACEMENT_POLICIES_ARC_RP_HH__
 
+#include <list>
+
 #include "base/types.hh"
 #include "mem/cache/replacement_policies/base.hh"
 
@@ -59,8 +61,15 @@ protected:
 		 * Default constructor. Invalidate data.
 		 */
 		ARCReplData() : lastTouchTick(0), refCount(0) {}
-	};
-
+        };
+private:
+        std::list<ARCReplData*> T1, T2, B1, B2;
+        uint64_t size;
+        int line_size;
+        int assoc;
+        int num_blocks;
+        int T1_size;
+        int T2_size;
 public:
 	/** Convenience typedef. */
 	typedef ARCRPParams Params;

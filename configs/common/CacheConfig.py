@@ -101,6 +101,8 @@ def config_cache(options, system):
         system.l2 = l2_cache_class(clk_domain=system.cpu_clk_domain,
                                    size=options.l2_size,
                                    assoc=options.l2_assoc)
+        system.l2.replacement_policy = ARCRP(size=options.l2_size,
+                                             assoc=options.l2_assoc)
 
         system.tol2bus = L2XBar(clk_domain = system.cpu_clk_domain)
         system.l2.cpu_side = system.tol2bus.master
@@ -123,6 +125,10 @@ def config_cache(options, system):
                                   assoc=options.l1i_assoc)
             dcache = dcache_class(size=options.l1d_size,
                                   assoc=options.l1d_assoc)
+            icache.replacement_policy = ARCRP(size=icache.size,
+                                              assoc=icache.assoc)
+            dcache.replacement_policy = ARCRP(size=dcache.size,
+                                              assoc=dcache.assoc)
 
             # If we have a walker cache specified, instantiate two
             # instances here

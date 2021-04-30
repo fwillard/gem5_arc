@@ -28,10 +28,11 @@
  * Authors: Daniel Carvalho
  */
 
+#include "mem/cache/replacement_policies/lfru_rp.hh"
+
 #include <cassert>
 #include <memory>
 
-#include "mem/cache/replacement_policies/arc_rp.hh"
 #include "params/LFRURP.hh"
 
 LFRURP::LFRURP(const Params *p)
@@ -45,8 +46,8 @@ LFRURP::invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
 const
 {
     // Reset all values
-    LFRUReplData* data = std::static_pointer_cast<LFRUReplData>(
-        candidate->replacementData);
+    std::shared_ptr<LFRUReplData> data =
+    std::static_pointer_cast<LFRUReplData>(replacement_data);
     data->privileged = false;
     data->lastTouchTick = Tick(0);
     data->refCount = 0;
@@ -57,9 +58,9 @@ LFRURP::touch(const std::shared_ptr<ReplacementData>& replacement_data)
 const
 {
     //update data and if accessed more than two times add to priv
-    LFRUReplData* data = std::static_pointer_cast<LFRUReplData>(
-        replacement_data);
-    data->lastTouchTick = currTick();
+    std::shared_ptr<LFRUReplData> data =
+    std::static_pointer_cast<LFRUReplData>(replacement_data);
+    data->lastTouchTick = curTick();
     data->refCount++;
     if (data->refCount > 2){
         data->privileged = true;
@@ -70,9 +71,9 @@ const
 void
 LFRURP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
 {	//new entry into cache
-    LFRUReplData* data = std::static_pointer_cast<LFRUReplData>(
-        replacement_data);
-    data->lastTouchTick = currTick();
+    std::shared_ptr<LFRUReplData> data =
+    std::static_pointer_cast<LFRUReplData>(replacement_data);
+    data->lastTouchTick = curTick();
     data->refCount = 1;
     data->privileged = false;
 }
@@ -89,16 +90,18 @@ LFRURP::getVictim(const ReplacementCandidates& candidates) const
         //only evict un-privileged blocks. LFU for unprivlidged partition
         for (const auto& candidate : candidates) {
         // Update victim entry if necessary
-        LFRUReplData* victim_data = std::static_pointer_cast<LFRUReplData>(
-            victim->replacementData)
-        LFRUReplData* data = std::static_pointer_cast<LFRUReplData>(
+        std::shared_ptr<LFRUReplData> victim_data =
+        std::static_pointer_cast<LFRUReplData>(
+            victim->replacementData);
+        std::shared_ptr<LFRUReplData> data =
+        std::static_pointer_cast<LFRUReplData>(
             candidate->replacementData);
-        if (!data->privileged){
-            priv_full = false;
-            if (data->refCount < victim_data->refCount){
-                victim = candidate;
+            if (!data->privileged){
+                priv_full = false;
+                if (data->refCount < victim_data->refCount){
+                    victim = candidate;
+                }
             }
-        }
         }
 
     //if all entries are in the priviledged list
@@ -106,15 +109,17 @@ LFRURP::getVictim(const ReplacementCandidates& candidates) const
     if (priv_full){
         for (const auto& candidate : candidates) {
                 // Update victim entry if necessary
-            LFRUReplData* victim_data = std::static_pointer_cast<LFRUReplData>(
-                victim->replacementData)
-            LFRUReplData* data = std::static_pointer_cast<LFRUReplData>(
+            std::shared_ptr<LFRUReplData> victim_data =
+            std::static_pointer_cast<LFRUReplData>(
+                victim->replacementData);
+            std::shared_ptr<LFRUReplData> data =
+            std::static_pointer_cast<LFRUReplData>(
                 candidate->replacementData);
             if (data->lastTouchTick < victim_data->lastTouchTick){
                 victim = candidate;
             }
         }
-        }
+    }
 
         return victim;
 }
